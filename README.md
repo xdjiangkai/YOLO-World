@@ -165,6 +165,11 @@ We evaluate all YOLO-World-V2.1 models on LVIS, LVIS-mini, and COCO in the zero-
 
 ## Getting started
 
+### 0. Create conda env
+```
+conda create -n yolo python=3.9
+```
+
 ### 1. Installation
 
 YOLO-World is developed based on `torch==1.11.0` `mmyolo==0.6.0` and `mmdetection==3.0.0`. Check more details about `requirements` and `mmcv` in [docs/installation](./docs/installation.md).
