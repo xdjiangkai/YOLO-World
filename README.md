@@ -165,10 +165,10 @@ We evaluate all YOLO-World-V2.1 models on LVIS, LVIS-mini, and COCO in the zero-
 
 ## Getting started
 
-### 0. Create conda env
-```
-conda create -n yolo python=3.9
-```
+### 0. IMPORTANT REFERENCE
+
+https://github.com/AILab-CVC/YOLO-World/issues/573
+
 
 ### 1. Installation
 
