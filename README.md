@@ -189,7 +189,7 @@ pip install -e .
 ### 2. IMAGE INFERENCE DEMO
 
 ```bash
-cd YOLO-orld
+cd YOLO-World
 
 python demo/image_demo.py configs/pretrain/yolo_world_v2_x_vlpan_bn_2e-3_100e_4x8gpus_obj365v1_goldg_train_lvis_minival.py weights/x_stage1-62b674ad.pth demo/sample_images 'person,dog,cat,car,bicycle' --topk 100 --threshold 0.005 --output-dir demo_outputs
 ```
