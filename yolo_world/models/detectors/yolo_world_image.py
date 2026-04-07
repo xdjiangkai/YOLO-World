@@ -200,13 +200,22 @@ class YOLOWorldImageDetector(YOLODetector):
         processing.
         """
 
-        img_feats, txt_feats = self.extract_feat(batch_inputs,
-                                                 batch_data_samples)
+        # img_feats, txt_feats = self.extract_feat(batch_inputs,
+        #                                          batch_data_samples)
+        img_feats, txt_feats, txt_masks = self.extract_feat(
+                                    batch_inputs, batch_data_samples)
 
         self.bbox_head.num_classes = txt_feats[0].shape[0]
 
+        # import ipdb; ipdb.set_trace()
+        
+        # results_list = self.bbox_head.predict(img_feats,
+        #                                       txt_feats,
+        #                                       batch_data_samples,
+        #                                       rescale=rescale)
         results_list = self.bbox_head.predict(img_feats,
                                               txt_feats,
+                                              txt_masks,
                                               batch_data_samples,
                                               rescale=rescale)
 
@@ -235,13 +244,22 @@ class YOLOWorldImageDetector(YOLODetector):
 
     def extract_feat(
             self, batch_inputs: Tensor,
-            batch_data_samples: SampleList) -> Tuple[Tuple[Tensor], Tensor]:
+            # batch_data_samples: SampleList) -> Tuple[Tuple[Tensor], Tensor]:
+            batch_data_samples: SampleList) -> Tuple[Tuple[Tensor], Tensor, Tensor]:
         """Extract features."""
+        txt_masks = None
         # only image features
         if self.has_embed:
             img_feats, _ = self.backbone(batch_inputs, None)
             txt_feats = self.txt_feats
+            ############ added for fixing the error of 'texts is not defined' ############
+            texts = None
+            ############ added for fixing the error of 'texts is not defined' ############
         else:
+            ############ added for fixing the error of 'texts is not defined' ############
+            txt_feats = None
+            ############ added for fixing the error of 'texts is not defined' ############
+
             if isinstance(batch_data_samples,
                           dict) and 'texts' in batch_data_samples:
                 texts = batch_data_samples['texts']
@@ -252,6 +270,7 @@ class YOLOWorldImageDetector(YOLODetector):
                 ]
             else:
                 texts = None
+        # import ipdb; ipdb.set_trace()
         if texts is not None:
             img_feats, txt_feats = self.backbone(batch_inputs, texts)
         else:
@@ -279,4 +298,13 @@ class YOLOWorldImageDetector(YOLODetector):
                 img_feats = self.neck(img_feats, txt_feats)
             else:
                 img_feats = self.neck(img_feats)
-        return img_feats, txt_feats
+        # return img_feats, txt_feats
+        
+        # Create txt_masks if not exists
+        if txt_masks is None and txt_feats is not None:
+            if isinstance(txt_feats, list):
+                txt_masks = [torch.ones((t.shape[0],), dtype=torch.bool, device=t.device) for t in txt_feats]
+            else:
+                txt_masks = torch.ones((txt_feats.shape[0],), dtype=torch.bool, device=txt_feats.device)
+        
+        return img_feats, txt_feats, txt_masks
