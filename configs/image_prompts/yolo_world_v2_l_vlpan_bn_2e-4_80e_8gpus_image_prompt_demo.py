@@ -1,3 +1,5 @@
+# python demo/image_prompt_demo.py     configs/image_prompts/yolo_world_v2_l_vlpan_bn_2e-4_80e_8gpus_image_prompt_demo.py ../yolo_world_v2_l_image_prompt_adapter-719a7afb.pth 
+
 _base_ = ('../../third_party/mmyolo/configs/yolov8/'
           'yolov8_l_syncbn_fast_8xb16-500e_coco.py')
 custom_imports = dict(imports=['yolo_world'], allow_failed_imports=False)
