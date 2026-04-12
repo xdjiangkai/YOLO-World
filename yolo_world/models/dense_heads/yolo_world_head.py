@@ -361,9 +361,47 @@ class YOLOWorldHead(YOLOv8Head):
 
         outs = self(img_feats, txt_feats, txt_masks)
         # Fast version
-        loss_inputs = outs + (batch_data_samples['bboxes_labels'],
-                              batch_data_samples['img_metas'])
-        losses = self.loss_by_feat(*loss_inputs)
+        if isinstance(batch_data_samples, dict):
+            # Fast version for dict batch_data_samples
+            # batch_data_samples['bboxes_labels'] has shape (num_boxes, 6),
+            # where each row is [batch_idx, label, x1, y1, x2, y2]
+            bboxes_labels = batch_data_samples['bboxes_labels']
+            batch_gt_instances = []
+            batch_img_metas = []
+            
+            # Get batch size from img_feats
+            b = img_feats[0].shape[0]
+            # Get device from img_feats
+            device = img_feats[0].device
+            
+            for i in range(b):
+                # Filter bboxes for this image
+                mask = bboxes_labels[:, 0] == i
+                if mask.any():
+                    bbox_label = bboxes_labels[mask, 1:]
+                    batch_gt_instances.append(
+                        InstanceData(bboxes=bbox_label[:, 1:].to(device),
+                                     labels=bbox_label[:, 0].to(device)))
+                else:
+                    # Empty instance for this image
+                    batch_gt_instances.append(
+                        InstanceData(bboxes=torch.zeros((0, 4), dtype=torch.float32, device=device),
+                                     labels=torch.zeros((0,), dtype=torch.long, device=device)))
+                
+                # Get img_meta from data_batch if available
+                batch_img_metas.append({})
+            
+            loss_inputs = outs + (txt_masks, batch_gt_instances,
+                                  batch_img_metas, None)
+            losses = self.loss_by_feat(*loss_inputs)
+        else:
+            # Use unpack_gt_instances for SampleList batch_data_samples
+            outputs = unpack_gt_instances(batch_data_samples)
+            (batch_gt_instances, batch_gt_instances_ignore,
+             batch_img_metas) = outputs
+            loss_inputs = outs + (txt_masks, batch_gt_instances,
+                                  batch_img_metas, batch_gt_instances_ignore)
+            losses = self.loss_by_feat(*loss_inputs)
 
         return losses
 
