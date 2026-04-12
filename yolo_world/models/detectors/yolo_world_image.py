@@ -303,8 +303,8 @@ class YOLOWorldImageDetector(YOLODetector):
         # Create txt_masks if not exists
         if txt_masks is None and txt_feats is not None:
             if isinstance(txt_feats, list):
-                txt_masks = [torch.ones((t.shape[0],), dtype=torch.bool, device=t.device) for t in txt_feats]
+                txt_masks = [torch.ones((t.shape[1],), dtype=torch.bool, device=t.device) for t in txt_feats]
             else:
-                txt_masks = torch.ones((txt_feats.shape[0],), dtype=torch.bool, device=txt_feats.device)
+                txt_masks = torch.ones((txt_feats.shape[1],), dtype=torch.bool, device=txt_feats.device)
         
         return img_feats, txt_feats, txt_masks
