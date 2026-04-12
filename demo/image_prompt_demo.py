@@ -222,7 +222,7 @@ def demo(runner, args, vision_encoder, vision_processor, padding_embed):
         example = gr.Examples(
             examples=[
                 [
-                    exp_image_dir + "0.jpeg", exp_prompt_dir + "0.png", "",
+                    exp_image_dir + "0.png", exp_prompt_dir + "0.png", "",
                     "none", 0.3, 0.5, 100
                 ],
                 [
@@ -299,7 +299,8 @@ if __name__ == '__main__':
     runner.model.eval()
 
     # init vision encoder
-    clip_model = "/group/40034/adriancheng/pretrained_models/open-ai-clip-vit-base-patch32"
+    # clip_model = "../pretrained_models/open-ai-clip-vit-base-patch32"
+    clip_model = "../pretrained_models/openai/clip-vit-base-patch32"
     vision_model = CLIPVisionModelWithProjection.from_pretrained(clip_model)
     processor = AutoProcessor.from_pretrained(clip_model)
     device = 'cuda:0'
