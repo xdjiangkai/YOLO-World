@@ -14,7 +14,8 @@ neck_num_heads = [4, 8, _base_.last_stage_out_channels // 2 // 32]
 base_lr = 2e-4
 weight_decay = 0.05
 train_batch_size_per_gpu = 16
-load_from = 'pretrained_models/yolo_world_l_clip_t2i_bn_2e-3adamw_32xb16-100e_obj365v1_goldg_cc3mlite_train-ca93cd1f.pth'
+# load_from = 'pretrained_models/yolo_world_l_clip_t2i_bn_2e-3adamw_32xb16-100e_obj365v1_goldg_cc3mlite_train-ca93cd1f.pth'
+load_from = '../pretrained_models/wondervictor/YOLO-World//yolo_world_v2_l_vlpan_bn_sgd_1e-3_40e_8gpus_finetune_coco_ep80-e1288152.pth'
 persistent_workers = False
 
 # model settings
@@ -49,10 +50,17 @@ model = dict(type='SimpleYOLOWorldDetector',
              train_cfg=dict(assigner=dict(num_classes=num_training_classes)))
 
 # dataset settings
+# coco_train_dataset = dict(type='YOLOv5CocoDataset',
+#                           data_root='data/coco',
+#                           ann_file='annotations/instances_train2017.json',
+#                           data_prefix=dict(img='train2017/'),
+#                           filter_cfg=dict(filter_empty_gt=False, min_size=32),
+#                           pipeline=_base_.train_pipeline)
+
 coco_train_dataset = dict(type='YOLOv5CocoDataset',
                           data_root='data/coco',
-                          ann_file='annotations/instances_train2017.json',
-                          data_prefix=dict(img='train2017/'),
+                          ann_file='annotations/instances_val2017.json',
+                          data_prefix=dict(img='val2017/'),
                           filter_cfg=dict(filter_empty_gt=False, min_size=32),
                           pipeline=_base_.train_pipeline)
 
