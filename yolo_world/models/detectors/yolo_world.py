@@ -59,7 +59,7 @@ class YOLOWorldDetector(YOLODetector):
         # encode text embeddings into the detector
         self.texts = texts
         # self.text_feats, None = self.backbone.forward_text(texts)
-        self.text_feats, None = self.backbone.forward_text(texts)
+        self.text_feats = self.backbone.forward_text(texts)
 
     def _forward(
             self,
@@ -159,12 +159,16 @@ class SimpleYOLOWorldDetector(YOLODetector):
              batch_data_samples: SampleList) -> Union[dict, list]:
         """Calculate losses from a batch of inputs and data samples."""
         self.bbox_head.num_classes = self.num_training_classes
-        img_feats, txt_feats = self.extract_feat(batch_inputs,
-                                                 batch_data_samples)
+        # img_feats, txt_feats = self.extract_feat(batch_inputs,
+        #                                          batch_data_samples)
+        img_feats, txt_feats, txt_masks = self.extract_feat(batch_inputs,
+                                                            batch_data_samples)
         if self.reparameterized:
             losses = self.bbox_head.loss(img_feats, batch_data_samples)
         else:
-            losses = self.bbox_head.loss(img_feats, txt_feats,
+            # losses = self.bbox_head.loss(img_feats, txt_feats,
+            #                              batch_data_samples)
+            losses = self.bbox_head.loss(img_feats, txt_feats, txt_masks,
                                          batch_data_samples)
         return losses
 
@@ -176,9 +180,10 @@ class SimpleYOLOWorldDetector(YOLODetector):
         processing.
         """
 
-        img_feats, txt_feats = self.extract_feat(batch_inputs,
-                                                 batch_data_samples)
-
+        # img_feats, txt_feats = self.extract_feat(batch_inputs,
+        #                                          batch_data_samples)
+        img_feats, txt_feats, txt_masks = self.extract_feat(batch_inputs,
+                                                            batch_data_samples)
         self.bbox_head.num_classes = self.num_test_classes
         if self.reparameterized:
             results_list = self.bbox_head.predict(img_feats,
@@ -187,6 +192,7 @@ class SimpleYOLOWorldDetector(YOLODetector):
         else:
             results_list = self.bbox_head.predict(img_feats,
                                                   txt_feats,
+                                                  txt_masks,
                                                   batch_data_samples,
                                                   rescale=rescale)
 
@@ -201,17 +207,18 @@ class SimpleYOLOWorldDetector(YOLODetector):
         """Network forward process. Usually includes backbone, neck and head
         forward without any post-processing.
         """
-        img_feats, txt_feats = self.extract_feat(batch_inputs,
-                                                 batch_data_samples)
+        img_feats, txt_feats, txt_masks = self.extract_feat(batch_inputs,
+                                                            batch_data_samples)
         if self.reparameterized:
             results = self.bbox_head.forward(img_feats)
         else:
-            results = self.bbox_head.forward(img_feats, txt_feats)
+            results = self.bbox_head.forward(img_feats, txt_feats, txt_masks)
         return results
 
     def extract_feat(
             self, batch_inputs: Tensor,
-            batch_data_samples: SampleList) -> Tuple[Tuple[Tensor], Tensor]:
+            # batch_data_samples: SampleList) -> Tuple[Tuple[Tensor], Tensor]:
+            batch_data_samples: SampleList) -> Tuple[Tuple[Tensor], Tensor, Tensor]:
         """Extract features."""
         # only image features
         img_feats, _ = self.backbone(batch_inputs, None)
@@ -230,4 +237,11 @@ class SimpleYOLOWorldDetector(YOLODetector):
                 img_feats = self.neck(img_feats, txt_feats)
             else:
                 img_feats = self.neck(img_feats)
-        return img_feats, txt_feats
+        # return img_feats, txt_feats
+        # Create txt_masks if not exists
+        txt_masks = None
+        if txt_feats is not None:
+            b = img_feats[0].shape[0]
+            txt_masks = torch.ones((b, txt_feats.shape[1]), dtype=torch.bool, device=txt_feats.device)
+        
+        return img_feats, txt_feats, txt_masks
