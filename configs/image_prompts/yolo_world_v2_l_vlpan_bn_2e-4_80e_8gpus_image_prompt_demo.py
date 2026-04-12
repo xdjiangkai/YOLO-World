@@ -1,5 +1,3 @@
-# python demo/image_prompt_demo.py     configs/image_prompts/yolo_world_v2_l_vlpan_bn_2e-4_80e_8gpus_image_prompt_demo.py ../yolo_world_v2_l_image_prompt_adapter-719a7afb.pth 
-
 _base_ = ('../../third_party/mmyolo/configs/yolov8/'
           'yolov8_l_syncbn_fast_8xb16-500e_coco.py')
 custom_imports = dict(imports=['yolo_world'], allow_failed_imports=False)
@@ -16,9 +14,12 @@ neck_num_heads = [4, 8, _base_.last_stage_out_channels // 2 // 32]
 base_lr = 2e-4
 weight_decay = 0.05
 train_batch_size_per_gpu = 16
-load_from = 'pretrained_models/yolo_world_l_clip_t2i_bn_2e-3adamw_32xb16-100e_obj365v1_goldg_cc3mlite_train-ca93cd1f.pth'
+# load_from = 'pretrained_models/yolo_world_l_clip_t2i_bn_2e-3adamw_32xb16-100e_obj365v1_goldg_cc3mlite_train-ca93cd1f.pth'
+# load_from = './weights/l_stage2-b3e3dc3f.pth'
+# load_from = '../pretrained_models/wondervictor/YOLO-World/yolo_world_l_clip_base_dual_vlpan_2e-3adamw_32xb16_100e_o365_goldg_cc3mlite_train_pretrained-7a5eea3b.pth'
+load_from = '../yolo_world_v2_l_image_prompt_adapter-719a7afb.pth'
 persistent_workers = False
-text_model_name = '../pretrained_models/open-ai-clip-vit-base-patch32'
+text_model_name = '../pretrained_models/openai/clip-vit-base-patch32'
 img_scale = (800, 800)
 
 # model settings
