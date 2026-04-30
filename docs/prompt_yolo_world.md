@@ -77,5 +77,5 @@ Using CLIP model to obtains the image and text embeddings will maintain the zero
 # Prepare COCO Data
 ```bash
 pip install modelscope
-modelscope download PAI/COCO2017 --local_dir ./PAI/COCO2017
-'''
+modelscope download --dataset PAI/COCO2017 --local_dir ./PAI/COCO2017
+```
